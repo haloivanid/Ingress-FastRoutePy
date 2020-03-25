@@ -4,7 +4,7 @@ import time
 import gpxpy
 import threading
 
-API_TOKEN = ''
+API_TOKEN = 'Paste Your API Here'
 
 class GPScalc:
 	def __init__(self, data):
