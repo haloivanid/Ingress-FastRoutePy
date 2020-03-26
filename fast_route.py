@@ -6,7 +6,7 @@ import threading
 import datetime
 import re
 
-API_TOKEN = '5b3ce3597851110001cf6248c3fff330345849a4971e71d32c695c77'
+API_TOKEN = ''
 
 class GPScalc:
 	def __init__(self, data):
