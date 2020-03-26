@@ -3,8 +3,10 @@ import json
 import time
 import gpxpy
 import threading
+import datetime
+import re
 
-API_TOKEN = 'Paste Your API Here'
+API_TOKEN = '5b3ce3597851110001cf6248c3fff330345849a4971e71d32c695c77'
 
 class GPScalc:
 	def __init__(self, data):
@@ -38,17 +40,39 @@ def bookmark():
 	return returnData
 
 def calc_data():
+	n_data = len(bookmark())
+	possibility = int((n_data*(n_data-1))/2)
+	start = datetime.datetime.now()
+	time_run_rec = []
 	route = []
 	gCalc = GPScalc(bookmark())
 	while True:
 		for i in gCalc.check_list():
 			for x in range(len(gCalc.check_list())):
 				if gCalc.check_list()[x] != i:
-					print(f'{i[0]}\tto\t{gCalc.check_list()[x][0]}')
+					time_run_rec.append(1)
+					# print(f'{i[0]}\tto\t{gCalc.check_list()[x][0]}')
+					print(f'Collecting route data: {len(time_run_rec)}/{possibility}')
 					print(f'{i[1]}\tto\t{gCalc.check_list()[x][1]}')
 					xy1 = xy1=i[1]
 					xy2 = gCalc.check_list()[x][1]
 					data = get_route_distance(xy1, xy2)
+					if len(time_run_rec)%40 == 0:
+						if not len(gCalc.check_list()) == 2:
+							end = datetime.datetime.now()
+							if end-start < datetime.timedelta(seconds=60):
+								while True:
+									work_time = str(datetime.datetime.now()-start).split('.')[0]
+									if str(work_time) == str(datetime.timedelta(seconds=61)):
+										break
+							else:
+								while True:
+									work_time = str(datetime.datetime.now()-start).split('.')[0]
+									sync_work_time = re.sub(r'.*:', '0:00:', work_time)
+									if str(sync_work_time) == str(datetime.timedelta(seconds=58)):
+										time.sleep(3)
+										break
+							start = datetime.datetime.now()
 					gCalc.data_calc.append([i[2], gCalc.check_list()[x][2], data])
 			gCalc.gps_calc.append(i)
 		break
@@ -99,52 +123,50 @@ def calc_data():
 
 	return route
 
+
 def get_route_distance(xy1, xy2):
 	while True:
 		try:
 			body = {"coordinates":[[xy1[1],xy1[0]],[xy2[1],xy2[0]]]}
 			headers = {
-				'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+				'Accept': 'application/json, application/geo+json, '
+				'application/gpx+xml, img/png; charset=utf-8',
 				'Authorization': API_TOKEN,
 				'Content-Type': 'application/json; charset=utf-8'
-				}
+			}
 			url = 'https://api.openrouteservice.org/v2/directions/cycling-road'
 			call = requests.post(url, json=body, headers=headers)
 			data = json.loads(call.text)
 			returnData = float(data['routes'][0]['summary']['distance'])
-			time.sleep(0.5)
 			return returnData
 			break
 		except Exception as e:
-			time.sleep(5)
+			print('JSON DATA ERROR: retrying to connect...')
+			time.sleep(2)
+
 
 def route2gpx(list_xy):
-	while True:
-		try:
-			if not len(list_xy) > 1:
-				raise ValueError('need more coordinates')
-			else:
+	if not len(list_xy) > 1:
+		raise ValueError('need more coordinates')
+	else:
+		yx = []
+		for i in list_xy:
+			rev_coor = [i[1], i[0]]
+			yx.append(rev_coor)
 
-				yx = []
-				for i in list_xy:
-					rev_coor = [i[1], i[0]]
-					yx.append(rev_coor)
-
-				body = {"coordinates":yx, "elevation":"true"}
-				headers = {
-					'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
-					'Authorization': API_TOKEN,
-					'Content-Type': 'application/json; charset=utf-8'
-				}
-				url = 'https://api.openrouteservice.org/v2/directions/cycling-road/gpx'
-				call = requests.post(url, json=body, headers=headers)
-				
-				with open('route.gpx', 'w+') as f:
-					gpx = gpxpy.parse(call.text)
-					f.write(gpx.to_xml())
-				break
-		except Exception as e:
-			time.sleep(5)
+			body = {"coordinates":yx, "elevation":"true"}
+			headers = {
+				'Accept': 'application/json, application/geo+json, '
+				'application/gpx+xml, img/png; charset=utf-8',
+				'Authorization': API_TOKEN,
+				'Content-Type': 'application/json; charset=utf-8'
+			}
+			url = 'https://api.openrouteservice.org/v2/directions/cycling-road/gpx'
+			call = requests.post(url, json=body, headers=headers)
+			
+		with open('route.gpx', 'w+') as f:
+			gpx = gpxpy.parse(call.text)
+			f.write(gpx.to_xml())
 
 
 def process():
@@ -153,6 +175,8 @@ def process():
 		for x in bookmark():
 			if i == x[2]:
 				route_gps.append(x[1])
+	print('-'*25)
+	print('Build the data...')
 	route2gpx(route_gps)
 	print('-'*25)
 	return route_gps
