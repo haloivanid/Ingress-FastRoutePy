@@ -60,7 +60,7 @@ def main():
 	print('-'*25)
 	overlayGPX(fast_route.process(), 15)
 	print("Your route has been finished")
-	print("Let's open index.html file")
+	print('-'*25)
 
 if __name__ == '__main__':
 	main()

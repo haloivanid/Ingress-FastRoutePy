@@ -42,7 +42,6 @@ def bookmark():
 def calc_data():
 	n_data = len(bookmark())
 	possibility = int((n_data*(n_data-1))/2)
-	start = datetime.datetime.now()
 	time_run_rec = []
 	route = []
 	gCalc = GPScalc(bookmark())
@@ -51,7 +50,6 @@ def calc_data():
 			for x in range(len(gCalc.check_list())):
 				if gCalc.check_list()[x] != i:
 					time_run_rec.append(1)
-					# print(f'{i[0]}\tto\t{gCalc.check_list()[x][0]}')
 					print(f'Collecting route data: {len(time_run_rec)}/{possibility}')
 					print(f'{i[1]}\tto\t{gCalc.check_list()[x][1]}')
 					xy1 = xy1=i[1]
@@ -59,20 +57,8 @@ def calc_data():
 					data = get_route_distance(xy1, xy2)
 					if len(time_run_rec)%40 == 0:
 						if not len(gCalc.check_list()) == 2:
-							end = datetime.datetime.now()
-							if end-start < datetime.timedelta(seconds=60):
-								while True:
-									work_time = str(datetime.datetime.now()-start).split('.')[0]
-									if str(work_time) == str(datetime.timedelta(seconds=61)):
-										break
-							else:
-								while True:
-									work_time = str(datetime.datetime.now()-start).split('.')[0]
-									sync_work_time = re.sub(r'.*:', '0:00:', work_time)
-									if str(sync_work_time) == str(datetime.timedelta(seconds=58)):
-										time.sleep(3)
-										break
-							start = datetime.datetime.now()
+							print('Access API is Cooled Down - Please be patient')
+							time.sleep(60)
 					gCalc.data_calc.append([i[2], gCalc.check_list()[x][2], data])
 			gCalc.gps_calc.append(i)
 		break
@@ -176,7 +162,7 @@ def process():
 			if i == x[2]:
 				route_gps.append(x[1])
 	print('-'*25)
-	print('Building the data...')
+	print('Building Data Route...')
 	route2gpx(route_gps)
 	print('-'*25)
 	return route_gps
