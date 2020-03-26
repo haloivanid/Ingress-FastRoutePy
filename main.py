@@ -59,7 +59,7 @@ def main():
 	print('Calculating and arrange the best route for you')
 	print('-'*25)
 	overlayGPX(fast_route.process(), 15)
-	print("You're the best route has been finished")
+	print("Your route has been finished")
 	print("Let's open index.html file")
 
 if __name__ == '__main__':

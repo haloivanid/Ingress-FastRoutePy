@@ -6,7 +6,7 @@ import threading
 import datetime
 import re
 
-API_TOKEN = ''
+API_TOKEN = 'Paste Your API Here'
 
 class GPScalc:
 	def __init__(self, data):
@@ -176,7 +176,7 @@ def process():
 			if i == x[2]:
 				route_gps.append(x[1])
 	print('-'*25)
-	print('Build the data...')
+	print('Building the data...')
 	route2gpx(route_gps)
 	print('-'*25)
 	return route_gps
